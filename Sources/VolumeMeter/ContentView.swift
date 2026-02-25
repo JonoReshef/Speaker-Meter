@@ -6,6 +6,11 @@ struct ContentView: View {
     @AppStorage("redThreshold") private var redThresholdDB: Double = 80
     @State private var showSettings = false
 
+    private let segmentHeight: CGFloat = 10
+    private let segmentSpacing: CGFloat = 3
+    private let minSegments = 5
+    private let maxSegments = 20
+
     private var yellowNormalized: Float {
         Float((yellowThresholdDB - 34) / 60)
     }
@@ -14,8 +19,17 @@ struct ContentView: View {
         Float((redThresholdDB - 34) / 60)
     }
 
+    private func segmentCount(forAvailableHeight height: CGFloat) -> Int {
+        let fit = Int((height + segmentSpacing) / (segmentHeight + segmentSpacing))
+        return max(minSegments, min(maxSegments, fit))
+    }
+
+    private func meterHeight(segments: Int) -> CGFloat {
+        CGFloat(segments) * segmentHeight + CGFloat(segments - 1) * segmentSpacing
+    }
+
     var body: some View {
-        VStack(spacing: 12) {
+        VStack(spacing: 8) {
             HStack {
                 Spacer()
                 Button(action: { showSettings.toggle() }) {
@@ -28,15 +42,19 @@ struct ContentView: View {
                 }
             }
 
-            VolumeMeterView(
-                level: audioManager.level,
-                yellowThreshold: yellowNormalized,
-                redThreshold: redNormalized
-            )
-            .frame(width: 40, height: 260)
-            .clipped()
+            GeometryReader { geo in
+                let segments = segmentCount(forAvailableHeight: geo.size.height)
+                VolumeMeterView(
+                    level: audioManager.level,
+                    yellowThreshold: yellowNormalized,
+                    redThreshold: redNormalized,
+                    segmentCount: segments
+                )
+                .frame(width: 40, height: meterHeight(segments: segments))
+                .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .center)
+            }
 
-            VStack(spacing: 4) {
+            VStack(spacing: 2) {
                 Text(String(format: "%.0f dB SPL", audioManager.decibelLevel))
                     .font(.system(.body, design: .monospaced))
                     .foregroundColor(.secondary)
@@ -44,7 +62,10 @@ struct ContentView: View {
                 Text(audioManager.deviceName)
                     .font(.caption)
                     .foregroundColor(.secondary)
+                    .lineLimit(1)
+                    .truncationMode(.tail)
             }
+            .fixedSize(horizontal: false, vertical: true)
 
             Button(action: {
                 if audioManager.isMonitoring {
@@ -54,11 +75,12 @@ struct ContentView: View {
                 }
             }) {
                 Text(audioManager.isMonitoring ? "Stop" : "Start")
-                    .frame(width: 80)
+                    .frame(width: 70)
             }
-            .controlSize(.large)
+            .controlSize(.regular)
             .buttonStyle(.borderedProminent)
             .tint(audioManager.isMonitoring ? .red : .green)
+            .fixedSize(horizontal: false, vertical: true)
 
             if let error = audioManager.errorMessage {
                 Text(error)
@@ -67,7 +89,8 @@ struct ContentView: View {
                     .multilineTextAlignment(.center)
             }
         }
-        .padding(16)
+        .padding(.horizontal, 10)
+        .padding(.vertical, 8)
         .onAppear {
             audioManager.startMonitoring()
         }

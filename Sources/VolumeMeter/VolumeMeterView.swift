@@ -4,17 +4,20 @@ struct VolumeMeterView: View {
     let level: Float
     var yellowThreshold: Float = 0.6
     var redThreshold: Float = 0.8
-    private let segmentCount = 20
+    var segmentCount: Int = 20
+
+    private let segmentHeight: CGFloat = 10
+    private let segmentSpacing: CGFloat = 3
 
     var body: some View {
-        VStack(spacing: 3) {
+        VStack(spacing: segmentSpacing) {
             ForEach((0..<segmentCount).reversed(), id: \.self) { index in
                 let threshold = Float(index) / Float(segmentCount)
                 let isActive = level > threshold
 
                 RoundedRectangle(cornerRadius: 2)
                     .fill(isActive ? colorForSegment(index) : Color.gray.opacity(0.3))
-                    .frame(width: 40)
+                    .frame(width: 40, height: segmentHeight)
             }
         }
         .animation(.easeOut(duration: 0.05), value: level)

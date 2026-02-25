@@ -17,6 +17,7 @@ mkdir -p "$APP_BUNDLE/Contents/Resources"
 
 cp .build/release/VolumeMeter "$APP_BUNDLE/Contents/MacOS/VolumeMeter"
 cp Resources/Info.plist "$APP_BUNDLE/Contents/Info.plist"
+cp Resources/AppIcon.icns "$APP_BUNDLE/Contents/Resources/AppIcon.icns"
 
 echo "Signing app bundle..."
 codesign --force --sign - --entitlements Resources/VolumeMeter.entitlements "$APP_BUNDLE"

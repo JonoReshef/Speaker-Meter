@@ -14,7 +14,7 @@ struct VolumeMeterView: View {
 
                 RoundedRectangle(cornerRadius: 2)
                     .fill(isActive ? colorForSegment(index) : Color.gray.opacity(0.3))
-                    .frame(height: 10)
+                    .frame(width: 40)
             }
         }
         .animation(.easeOut(duration: 0.05), value: level)

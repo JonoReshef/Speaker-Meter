@@ -18,6 +18,8 @@
     <string>APPL</string>
     <key>NSMicrophoneUsageDescription</key>
     <string>VolumeMeter needs microphone access to monitor audio input levels.</string>
+    <key>CFBundleIconFile</key>
+    <string>AppIcon</string>
     <key>NSHighResolutionCapable</key>
     <true/>
 </dict>

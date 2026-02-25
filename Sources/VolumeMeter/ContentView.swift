@@ -33,11 +33,12 @@ struct ContentView: View {
                 yellowThreshold: yellowNormalized,
                 redThreshold: redNormalized
             )
-            .frame(width: 40, height: 220)
+            .frame(width: 40, height: 260)
+            .clipped()
 
             VStack(spacing: 4) {
                 Text(String(format: "%.0f dB SPL", audioManager.decibelLevel))
-                    .font(.system(.title2, design: .monospaced))
+                    .font(.system(.body, design: .monospaced))
                     .foregroundColor(.secondary)
 
                 Text(audioManager.deviceName)

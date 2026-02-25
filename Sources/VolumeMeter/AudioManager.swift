@@ -1,11 +1,13 @@
 import AVFoundation
 import Combine
+import CoreAudio
 
 final class AudioManager: ObservableObject {
     @Published var level: Float = 0.0
     @Published var decibelLevel: Float = 0.0
     @Published var isMonitoring: Bool = false
     @Published var errorMessage: String?
+    @Published var deviceName: String = "Unknown"
 
     private var audioEngine: AVAudioEngine?
     private let smoothingFactor: Float = 0.3
@@ -58,9 +60,43 @@ final class AudioManager: ObservableObject {
             audioEngine = engine
             isMonitoring = true
             errorMessage = nil
+            deviceName = Self.defaultInputDeviceName()
         } catch {
             errorMessage = "Failed to start audio engine: \(error.localizedDescription)"
         }
+    }
+
+    private static func defaultInputDeviceName() -> String {
+        var deviceID: AudioDeviceID = 0
+        var size = UInt32(MemoryLayout<AudioDeviceID>.size)
+        var address = AudioObjectPropertyAddress(
+            mSelector: kAudioHardwarePropertyDefaultInputDevice,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        let status = AudioObjectGetPropertyData(
+            AudioObjectID(kAudioObjectSystemObject), &address, 0, nil, &size, &deviceID
+        )
+        guard status == noErr else { return "Unknown" }
+
+        var nameAddress = AudioObjectPropertyAddress(
+            mSelector: kAudioObjectPropertyName,
+            mScope: kAudioObjectPropertyScopeGlobal,
+            mElement: kAudioObjectPropertyElementMain
+        )
+        var nameSize: UInt32 = 0
+        guard AudioObjectGetPropertyDataSize(deviceID, &nameAddress, 0, nil, &nameSize) == noErr else {
+            return "Unknown"
+        }
+        var nameData = [UInt8](repeating: 0, count: Int(nameSize))
+        let nameStatus = nameData.withUnsafeMutableBytes { ptr in
+            AudioObjectGetPropertyData(deviceID, &nameAddress, 0, nil, &nameSize, ptr.baseAddress!)
+        }
+        guard nameStatus == noErr else { return "Unknown" }
+        let name = nameData.withUnsafeBytes { ptr in
+            ptr.load(as: CFString.self)
+        }
+        return name as String
     }
 
     private func processBuffer(_ buffer: AVAudioPCMBuffer) {

@@ -12,11 +12,11 @@ struct ContentView: View {
     private let maxSegments = 20
 
     private var yellowNormalized: Float {
-        Float((yellowThresholdDB - 34) / 60)
+        Float((yellowThresholdDB - 30) / 60)
     }
 
     private var redNormalized: Float {
-        Float((redThresholdDB - 34) / 60)
+        Float((redThresholdDB - 30) / 60)
     }
 
     private func segmentCount(forAvailableHeight height: CGFloat) -> Int {
@@ -106,7 +106,7 @@ struct ContentView: View {
                     .frame(width: 50, alignment: .leading)
                 Stepper(
                     value: $yellowThresholdDB,
-                    in: 34...94,
+                    in: 30...90,
                     step: 1
                 ) {
                     Text("\(Int(yellowThresholdDB)) dB")
@@ -119,7 +119,7 @@ struct ContentView: View {
                     .frame(width: 50, alignment: .leading)
                 Stepper(
                     value: $redThresholdDB,
-                    in: 34...94,
+                    in: 30...90,
                     step: 1
                 ) {
                     Text("\(Int(redThresholdDB)) dB")

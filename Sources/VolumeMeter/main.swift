@@ -41,7 +41,10 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         window.minSize = NSSize(width: 140, height: minContentH + titleBarHeight)
         window.maxSize = NSSize(width: 300, height: maxContentH + titleBarHeight)
 
-        window.setContentSize(NSSize(width: 160, height: maxContentH))
+        let savedSegments = UserDefaults.standard.integer(forKey: "segmentCount")
+        let initialSegments = (minSegments...maxSegments).contains(savedSegments) ? savedSegments : maxSegments
+        let initialContentH = meterHeight(for: initialSegments) + chromeHeight
+        window.setContentSize(NSSize(width: 160, height: initialContentH))
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window
@@ -53,6 +56,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let fitCount = Int((available + segmentSpacing) / (segmentHeight + segmentSpacing))
         let clamped = max(minSegments, min(maxSegments, fitCount))
         let snappedContentH = meterHeight(for: clamped) + chromeHeight
+        UserDefaults.standard.set(clamped, forKey: "segmentCount")
         return NSSize(width: frameSize.width, height: snappedContentH + titleBarHeight)
     }
 

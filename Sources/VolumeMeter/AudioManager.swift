@@ -3,7 +3,7 @@ import Combine
 
 final class AudioManager: ObservableObject {
     @Published var level: Float = 0.0
-    @Published var decibelLevel: Float = -60.0
+    @Published var decibelLevel: Float = 0.0
     @Published var isMonitoring: Bool = false
     @Published var errorMessage: String?
 
@@ -40,7 +40,7 @@ final class AudioManager: ObservableObject {
         DispatchQueue.main.async {
             self.isMonitoring = false
             self.level = 0.0
-            self.decibelLevel = -60.0
+            self.decibelLevel = 0.0
         }
     }
 
@@ -91,7 +91,8 @@ final class AudioManager: ObservableObject {
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.level = self.level + self.smoothingFactor * (normalized - self.level)
-            self.decibelLevel = clampedDb
+            // Convert to approximate dB SPL: digital 0 dBFS ≈ 94 dB SPL reference
+            self.decibelLevel = clampedDb + 94.0
         }
     }
 }

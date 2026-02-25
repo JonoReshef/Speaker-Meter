@@ -9,9 +9,9 @@ struct ContentView: View {
                 .font(.title.bold())
 
             VolumeMeterView(level: audioManager.level)
-                .frame(height: 30)
+                .frame(width: 40, height: 220)
 
-            Text(String(format: "%.1f dB", audioManager.decibelLevel))
+            Text(String(format: "%.0f dB SPL", audioManager.decibelLevel))
                 .font(.system(.title2, design: .monospaced))
                 .foregroundColor(.secondary)
 
@@ -37,7 +37,7 @@ struct ContentView: View {
             }
         }
         .padding(30)
-        .frame(minWidth: 300, minHeight: 200)
+        .frame(minWidth: 300, minHeight: 400)
         .onAppear {
             audioManager.startMonitoring()
         }

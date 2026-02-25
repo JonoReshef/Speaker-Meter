@@ -5,14 +5,14 @@ struct VolumeMeterView: View {
     private let segmentCount = 20
 
     var body: some View {
-        HStack(spacing: 3) {
-            ForEach(0..<segmentCount, id: \.self) { index in
+        VStack(spacing: 3) {
+            ForEach((0..<segmentCount).reversed(), id: \.self) { index in
                 let threshold = Float(index) / Float(segmentCount)
                 let isActive = level > threshold
 
                 RoundedRectangle(cornerRadius: 2)
                     .fill(isActive ? colorForSegment(index) : Color.gray.opacity(0.3))
-                    .frame(width: 16)
+                    .frame(height: 10)
             }
         }
         .animation(.easeOut(duration: 0.05), value: level)

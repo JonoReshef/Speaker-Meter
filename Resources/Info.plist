@@ -22,5 +22,7 @@
     <string>AppIcon</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSSpeechRecognitionUsageDescription</key>
+    <string>VolumeMeter uses on-device speech recognition to measure your speaking pace (words per minute).</string>
 </dict>
 </plist>

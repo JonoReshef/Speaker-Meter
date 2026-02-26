@@ -9,6 +9,8 @@ final class AudioManager: ObservableObject {
     @Published var errorMessage: String?
     @Published var deviceName: String = "Unknown"
 
+    var onAudioBuffer: ((AVAudioPCMBuffer) -> Void)?
+
     private var audioEngine: AVAudioEngine?
     private let smoothingFactor: Float = 0.3
 
@@ -51,8 +53,9 @@ final class AudioManager: ObservableObject {
         let inputNode = engine.inputNode
         let format = inputNode.outputFormat(forBus: 0)
 
-        inputNode.installTap(onBus: 0, bufferSize: 1024, format: format) { [weak self] buffer, _ in
+        inputNode.installTap(onBus: 0, bufferSize: 4096, format: format) { [weak self] buffer, _ in
             self?.processBuffer(buffer)
+            self?.onAudioBuffer?(buffer)
         }
 
         do {

@@ -16,7 +16,9 @@ let package = Package(
                     "-Xlinker", "-sectcreate",
                     "-Xlinker", "__TEXT",
                     "-Xlinker", "__info_plist",
-                    "-Xlinker", "Resources/Info.plist"
+                    "-Xlinker", "Resources/Info.plist",
+                    "-Xlinker", "-weak_framework",
+                    "-Xlinker", "Speech"
                 ])
             ]
         )

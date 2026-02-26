@@ -2,8 +2,11 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var audioManager = AudioManager()
+    @StateObject private var paceObserver = SpeechPaceObserver()
     @AppStorage("yellowThreshold") private var yellowThresholdDB: Double = 60
     @AppStorage("redThreshold") private var redThresholdDB: Double = 80
+    @AppStorage("yellowWPMThreshold") private var yellowWPMThreshold: Double = 150
+    @AppStorage("redWPMThreshold") private var redWPMThreshold: Double = 180
     @State private var showSettings = false
 
     private let segmentHeight: CGFloat = 10
@@ -67,11 +70,23 @@ struct ContentView: View {
             }
             .fixedSize(horizontal: false, vertical: true)
 
+            if paceObserver.isAvailable {
+                WPMGraphView(
+                    history: paceObserver.wpmHistory,
+                    maxPoints: 90,
+                    yellowThreshold: yellowWPMThreshold,
+                    redThreshold: redWPMThreshold
+                )
+                .frame(height: 50)
+            }
+
             Button(action: {
                 if audioManager.isMonitoring {
                     audioManager.stopMonitoring()
+                    paceObserver.stopAnalyzing()
                 } else {
                     audioManager.startMonitoring()
+                    paceObserver.startAnalyzing()
                 }
             }) {
                 Text(audioManager.isMonitoring ? "Stop" : "Start")
@@ -92,13 +107,17 @@ struct ContentView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .onAppear {
+            audioManager.onAudioBuffer = { [weak paceObserver] buffer in
+                paceObserver?.processAudioBuffer(buffer)
+            }
             audioManager.startMonitoring()
+            paceObserver.startAnalyzing()
         }
     }
 
     private var settingsContent: some View {
         VStack(alignment: .leading, spacing: 12) {
-            Text("Thresholds (dB SPL)")
+            Text("Volume Thresholds (dB)")
                 .font(.headline)
 
             HStack {
@@ -126,8 +145,41 @@ struct ContentView: View {
                         .font(.system(.body, design: .monospaced))
                 }
             }
+
+            if paceObserver.isAvailable {
+                Divider()
+
+                Text("Pace Thresholds (WPM)")
+                    .font(.headline)
+
+                HStack {
+                    Text("Yellow:")
+                        .frame(width: 50, alignment: .leading)
+                    Stepper(
+                        value: $yellowWPMThreshold,
+                        in: 80...250,
+                        step: 5
+                    ) {
+                        Text("\(Int(yellowWPMThreshold)) WPM")
+                            .font(.system(.body, design: .monospaced))
+                    }
+                }
+
+                HStack {
+                    Text("Red:")
+                        .frame(width: 50, alignment: .leading)
+                    Stepper(
+                        value: $redWPMThreshold,
+                        in: 80...250,
+                        step: 5
+                    ) {
+                        Text("\(Int(redWPMThreshold)) WPM")
+                            .font(.system(.body, design: .monospaced))
+                    }
+                }
+            }
         }
         .padding()
-        .frame(width: 220)
+        .frame(width: 260)
     }
 }

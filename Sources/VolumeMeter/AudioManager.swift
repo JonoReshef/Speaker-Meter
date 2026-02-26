@@ -127,11 +127,12 @@ final class AudioManager: ObservableObject {
         // Normalize: -60dB → 0.0, 0dB → 1.0
         let normalized = (clampedDb + 60.0) / 60.0
 
+        let splDb = clampedDb + 90.0
         DispatchQueue.main.async { [weak self] in
             guard let self else { return }
             self.level = self.level + self.smoothingFactor * (normalized - self.level)
             // Convert to approximate dB SPL: digital 0 dBFS ≈ 90 dB SPL reference
-            self.decibelLevel = clampedDb + 90.0
+            self.decibelLevel = self.decibelLevel + self.smoothingFactor * (splDb - self.decibelLevel)
         }
     }
 }

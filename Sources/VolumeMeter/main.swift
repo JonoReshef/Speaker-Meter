@@ -45,6 +45,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
         let initialSegments = (minSegments...maxSegments).contains(savedSegments) ? savedSegments : maxSegments
         let initialContentH = meterHeight(for: initialSegments) + chromeHeight
         window.setContentSize(NSSize(width: 160, height: initialContentH))
+        window.level = .floating
         window.center()
         window.makeKeyAndOrderFront(nil)
         self.window = window

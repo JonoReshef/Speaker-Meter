@@ -2,11 +2,13 @@ import SwiftUI
 
 struct ContentView: View {
     @StateObject private var audioManager = AudioManager()
-    @StateObject private var paceObserver = SpeechPaceObserver()
+    @StateObject private var paceAnalyzer = AcousticPaceAnalyzer()
     @AppStorage("yellowThreshold") private var yellowThresholdDB: Double = 60
     @AppStorage("redThreshold") private var redThresholdDB: Double = 80
     @AppStorage("yellowWPMThreshold") private var yellowWPMThreshold: Double = 150
     @AppStorage("redWPMThreshold") private var redWPMThreshold: Double = 180
+    @AppStorage("minWPM") private var minWPM: Double = 80
+    @AppStorage("maxWPM") private var maxWPM: Double = 250
     @State private var showSettings = false
 
     private let segmentHeight: CGFloat = 10
@@ -70,23 +72,23 @@ struct ContentView: View {
             }
             .fixedSize(horizontal: false, vertical: true)
 
-            if paceObserver.isAvailable {
-                WPMGraphView(
-                    history: paceObserver.wpmHistory,
-                    maxPoints: 90,
-                    yellowThreshold: yellowWPMThreshold,
-                    redThreshold: redWPMThreshold
-                )
-                .frame(height: 50)
-            }
+            WPMGraphView(
+                history: paceAnalyzer.wpmHistory,
+                maxPoints: 90,
+                yellowThreshold: yellowWPMThreshold,
+                redThreshold: redWPMThreshold,
+                minWPM: minWPM,
+                maxWPM: maxWPM
+            )
+            .frame(height: 50)
 
             Button(action: {
                 if audioManager.isMonitoring {
                     audioManager.stopMonitoring()
-                    paceObserver.stopAnalyzing()
+                    paceAnalyzer.stopAnalyzing()
                 } else {
                     audioManager.startMonitoring()
-                    paceObserver.startAnalyzing()
+                    paceAnalyzer.startAnalyzing()
                 }
             }) {
                 Text(audioManager.isMonitoring ? "Stop" : "Start")
@@ -107,11 +109,11 @@ struct ContentView: View {
         .padding(.horizontal, 10)
         .padding(.vertical, 8)
         .onAppear {
-            audioManager.onAudioBuffer = { [weak paceObserver] buffer in
-                paceObserver?.processAudioBuffer(buffer)
+            audioManager.onAudioBuffer = { [weak paceAnalyzer] buffer in
+                paceAnalyzer?.processAudioBuffer(buffer)
             }
             audioManager.startMonitoring()
-            paceObserver.startAnalyzing()
+            paceAnalyzer.startAnalyzing()
         }
     }
 
@@ -146,36 +148,65 @@ struct ContentView: View {
                 }
             }
 
-            if paceObserver.isAvailable {
-                Divider()
+            Divider()
 
-                Text("Pace Thresholds (WPM)")
-                    .font(.headline)
+            Text("Pace Graph Range (WPM)")
+                .font(.headline)
 
-                HStack {
-                    Text("Yellow:")
-                        .frame(width: 50, alignment: .leading)
-                    Stepper(
-                        value: $yellowWPMThreshold,
-                        in: 80...250,
-                        step: 5
-                    ) {
-                        Text("\(Int(yellowWPMThreshold)) WPM")
-                            .font(.system(.body, design: .monospaced))
-                    }
+            HStack {
+                Text("Min:")
+                    .frame(width: 50, alignment: .leading)
+                Stepper(
+                    value: $minWPM,
+                    in: 0...(maxWPM - 10),
+                    step: 10
+                ) {
+                    Text("\(Int(minWPM)) WPM")
+                        .font(.system(.body, design: .monospaced))
                 }
+            }
 
-                HStack {
-                    Text("Red:")
-                        .frame(width: 50, alignment: .leading)
-                    Stepper(
-                        value: $redWPMThreshold,
-                        in: 80...250,
-                        step: 5
-                    ) {
-                        Text("\(Int(redWPMThreshold)) WPM")
-                            .font(.system(.body, design: .monospaced))
-                    }
+            HStack {
+                Text("Max:")
+                    .frame(width: 50, alignment: .leading)
+                Stepper(
+                    value: $maxWPM,
+                    in: (minWPM + 10)...400,
+                    step: 10
+                ) {
+                    Text("\(Int(maxWPM)) WPM")
+                        .font(.system(.body, design: .monospaced))
+                }
+            }
+
+            Divider()
+
+            Text("Pace Thresholds (WPM)")
+                .font(.headline)
+
+            HStack {
+                Text("Yellow:")
+                    .frame(width: 50, alignment: .leading)
+                Stepper(
+                    value: $yellowWPMThreshold,
+                    in: 80...250,
+                    step: 5
+                ) {
+                    Text("\(Int(yellowWPMThreshold)) WPM")
+                        .font(.system(.body, design: .monospaced))
+                }
+            }
+
+            HStack {
+                Text("Red:")
+                    .frame(width: 50, alignment: .leading)
+                Stepper(
+                    value: $redWPMThreshold,
+                    in: 80...250,
+                    step: 5
+                ) {
+                    Text("\(Int(redWPMThreshold)) WPM")
+                        .font(.system(.body, design: .monospaced))
                 }
             }
         }

@@ -5,13 +5,14 @@ struct WPMGraphView: View {
     let maxPoints: Int
     var yellowThreshold: Double = 150
     var redThreshold: Double = 180
+    var minWPM: Double = 0
+    var maxWPM: Double = 250
 
-    private let maxWPM: Double = 250
+    private var wpmRange: Double { max(maxWPM - minWPM, 1) }
 
-    private var currentColor: Color {
-        guard let last = history.last, last > 0 else { return .green }
-        if last >= redThreshold { return .red }
-        if last >= yellowThreshold { return .yellow }
+    private func colorForWPM(_ wpm: Double) -> Color {
+        if wpm >= redThreshold { return .red }
+        if wpm >= yellowThreshold { return .yellow }
         return .green
     }
 
@@ -29,29 +30,33 @@ struct WPMGraphView: View {
                 thresholdLine(at: yellowThreshold, color: .yellow, width: w, height: h)
                 thresholdLine(at: redThreshold, color: .red, width: w, height: h)
 
-                // Graph area fill + line
+                // Per-segment colored graph
                 if history.count >= 2 {
-                    let points = graphPoints(width: w, height: h)
+                    let data = Array(history.suffix(maxPoints))
+                    let points = graphPoints(data: data, width: w, height: h)
 
-                    // Filled area
-                    Path { path in
-                        path.move(to: CGPoint(x: points[0].x, y: h))
-                        for pt in points {
-                            path.addLine(to: pt)
-                        }
-                        path.addLine(to: CGPoint(x: points.last!.x, y: h))
-                        path.closeSubpath()
-                    }
-                    .fill(currentColor.opacity(0.2))
+                    // Draw each segment with the color of its higher-WPM endpoint
+                    ForEach(0..<(points.count - 1), id: \.self) { i in
+                        let segmentWPM = max(data[i], data[i + 1])
+                        let color = colorForWPM(segmentWPM)
 
-                    // Line
-                    Path { path in
-                        path.move(to: points[0])
-                        for pt in points.dropFirst() {
-                            path.addLine(to: pt)
+                        // Filled area for this segment
+                        Path { path in
+                            path.move(to: CGPoint(x: points[i].x, y: h))
+                            path.addLine(to: points[i])
+                            path.addLine(to: points[i + 1])
+                            path.addLine(to: CGPoint(x: points[i + 1].x, y: h))
+                            path.closeSubpath()
                         }
+                        .fill(color.opacity(0.2))
+
+                        // Line segment
+                        Path { path in
+                            path.move(to: points[i])
+                            path.addLine(to: points[i + 1])
+                        }
+                        .stroke(color, lineWidth: 1.5)
                     }
-                    .stroke(currentColor, lineWidth: 1.5)
                 }
 
                 // Current WPM label
@@ -60,9 +65,10 @@ struct WPMGraphView: View {
                     HStack {
                         Spacer()
                         let wpm = history.last ?? 0
+                        let labelColor = wpm > 0 ? colorForWPM(wpm) : .green
                         Text(wpm > 0 ? String(format: "%.0f", wpm) : "--")
                             .font(.system(size: 11, weight: .medium, design: .monospaced))
-                            .foregroundColor(currentColor)
+                            .foregroundColor(labelColor)
                             .padding(.horizontal, 4)
                             .padding(.vertical, 1)
                             .background(Color(nsColor: .windowBackgroundColor).opacity(0.8))
@@ -88,20 +94,23 @@ struct WPMGraphView: View {
         }
     }
 
-    private func graphPoints(width: CGFloat, height: CGFloat) -> [CGPoint] {
-        let data = Array(history.suffix(maxPoints))
+    private func normalizedY(_ wpm: Double, height: CGFloat) -> CGFloat {
+        let clamped = min(max(wpm, minWPM), maxWPM)
+        return height * (1 - (clamped - minWPM) / wpmRange)
+    }
+
+    private func graphPoints(data: [Double], width: CGFloat, height: CGFloat) -> [CGPoint] {
         let step = width / CGFloat(maxPoints - 1)
         let offset = CGFloat(maxPoints - data.count)
         return data.enumerated().map { i, wpm in
             let x = (offset + CGFloat(i)) * step
-            let clamped = min(wpm, maxWPM)
-            let y = height * (1 - clamped / maxWPM)
+            let y = normalizedY(wpm, height: height)
             return CGPoint(x: x, y: y)
         }
     }
 
     private func thresholdLine(at value: Double, color: Color, width: CGFloat, height: CGFloat) -> some View {
-        let y = height * (1 - value / maxWPM)
+        let y = normalizedY(value, height: height)
         return Path { path in
             path.move(to: CGPoint(x: 0, y: y))
             path.addLine(to: CGPoint(x: width, y: y))

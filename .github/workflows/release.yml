@@ -1,0 +1,33 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  build-and-release:
+    runs-on: macos-14
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Build app bundle
+        run: bash Scripts/build.sh
+
+      - name: Zip app bundle
+        run: cd build && zip -r SpeakMeter.zip SpeakMeter.app
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: build/SpeakMeter.zip
+          generate_release_notes: true
+          body: |
+            ## Install
+
+            1. Download `SpeakMeter.zip`
+            2. Unzip and drag `SpeakMeter.app` to your Applications folder
+            3. On first launch, right-click the app and select **Open** (required for unsigned apps)
+            4. Grant microphone permission when prompted

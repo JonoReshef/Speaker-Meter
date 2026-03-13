@@ -14,6 +14,12 @@ I speak too fast and too loud most of the time time. This helps me keep it in ch
 - Just open the app, it will float on top of other windows as long as they are not in full-screen mode
 - I have not done any extensive testing but it has not perceptible impact on CPU or battery on my MacBook Pro, even with the volume and pace graphs updating in real-time.
 
+## Download
+
+[Download latest release](https://github.com/JonoReshef/VolumeMeter/releases/latest)
+
+Unzip `SpeakMeter.zip`, drag `SpeakMeter.app` to your Applications folder, then right-click > **Open** on first launch (required for unsigned apps).
+
 ## Requirements
 
 - macOS 14+ (Sonoma)

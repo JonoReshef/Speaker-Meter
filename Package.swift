@@ -3,14 +3,14 @@
 import PackageDescription
 
 let package = Package(
-    name: "VolumeMeter",
+    name: "SpeakMeter",
     platforms: [
         .macOS(.v14)
     ],
     targets: [
         .executableTarget(
-            name: "VolumeMeter",
-            path: "Sources/VolumeMeter",
+            name: "SpeakMeter",
+            path: "Sources/SpeakMeter",
             linkerSettings: [
                 .unsafeFlags([
                     "-Xlinker", "-sectcreate",

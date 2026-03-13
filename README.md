@@ -16,6 +16,14 @@ chmod +x Scripts/build.sh
 open build/VolumeMeter.app
 ```
 
+## Install
+
+To install to your Applications folder:
+
+```bash
+bash Scripts/build.sh && cp -R build/SpeakMeter.app /Applications/
+```
+
 ## Usage
 
 1. Grant microphone permission when prompted

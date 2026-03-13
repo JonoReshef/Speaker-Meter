@@ -51,7 +51,6 @@ final class AcousticPaceAnalyzer: ObservableObject {
     // MARK: - Smoothing / history
 
     private var smoothedWPM: Double = 0
-    private var timerCancellable: AnyCancellable?
 
     // MARK: - Public API
 
@@ -64,18 +63,9 @@ final class AcousticPaceAnalyzer: ObservableObject {
         envelopeBuffer.removeAll()
         isSpeaking = false
         vadHoldRemaining = 0
-
-        // Sample history at ~3 Hz
-        timerCancellable = Timer.publish(every: 1.0 / 3.0, on: .main, in: .common)
-            .autoconnect()
-            .sink { [weak self] _ in
-                self?.appendToHistory()
-            }
     }
 
     func stopAnalyzing() {
-        timerCancellable?.cancel()
-        timerCancellable = nil
         isAnalyzing = false
         smoothedWPM = 0
         wordsPerMinute = 0
@@ -327,7 +317,8 @@ final class AcousticPaceAnalyzer: ObservableObject {
 
     // MARK: - History
 
-    private func appendToHistory() {
+    /// Called externally by the shared history timer to append the current WPM reading.
+    func appendToHistory() {
         wordsPerMinute = smoothedWPM
         wpmHistory.append(wordsPerMinute)
         if wpmHistory.count > Self.maxHistoryCount {

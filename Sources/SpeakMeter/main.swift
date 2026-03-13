@@ -24,7 +24,7 @@ class AppDelegate: NSObject, NSApplicationDelegate, NSWindowDelegate {
             backing: .buffered,
             defer: false
         )
-        window.title = "VolumeMeter"
+        window.title = "SpeakMeter"
         window.delegate = self
         window.contentView = NSHostingView(rootView: contentView)
 

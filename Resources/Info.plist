@@ -3,24 +3,30 @@
 <plist version="1.0">
 <dict>
     <key>CFBundleIdentifier</key>
-    <string>com.volumemeter.app</string>
+    <string>com.yourname.speakmeter</string>
     <key>CFBundleName</key>
-    <string>VolumeMeter</string>
+    <string>SpeakMeter</string>
     <key>CFBundleDisplayName</key>
-    <string>VolumeMeter</string>
+    <string>SpeakMeter</string>
     <key>CFBundleExecutable</key>
-    <string>VolumeMeter</string>
+    <string>SpeakMeter</string>
     <key>CFBundleVersion</key>
-    <string>1.0</string>
+    <string>1</string>
     <key>CFBundleShortVersionString</key>
-    <string>1.0</string>
+    <string>1.0.0</string>
     <key>CFBundlePackageType</key>
     <string>APPL</string>
+    <key>LSApplicationCategoryType</key>
+    <string>public.app-category.utilities</string>
+    <key>LSMinimumSystemVersion</key>
+    <string>14.0</string>
     <key>NSMicrophoneUsageDescription</key>
-    <string>VolumeMeter needs microphone access to monitor audio input levels.</string>
+    <string>SpeakMeter needs microphone access to monitor your speaking volume and pace in real time.</string>
     <key>CFBundleIconFile</key>
     <string>AppIcon</string>
     <key>NSHighResolutionCapable</key>
     <true/>
+    <key>NSHumanReadableCopyright</key>
+    <string>Copyright 2025. All rights reserved.</string>
 </dict>
 </plist>

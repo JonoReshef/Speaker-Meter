@@ -8,11 +8,13 @@ final class AudioManager: ObservableObject {
     @Published var isMonitoring: Bool = false
     @Published var errorMessage: String?
     @Published var deviceName: String = "Unknown"
+    @Published var decibelHistory: [Double] = []
 
     var onAudioBuffer: ((AVAudioPCMBuffer) -> Void)?
 
     private var audioEngine: AVAudioEngine?
     private let smoothingFactor: Float = 0.3
+    private let maxHistoryPoints = 90
 
     func startMonitoring() {
         guard !isMonitoring else { return }
@@ -45,6 +47,14 @@ final class AudioManager: ObservableObject {
             self.isMonitoring = false
             self.level = 0.0
             self.decibelLevel = 0.0
+        }
+    }
+
+    /// Called externally by the shared history timer to append the current dB reading.
+    func appendDecibelToHistory() {
+        decibelHistory.append(Double(decibelLevel))
+        if decibelHistory.count > maxHistoryPoints {
+            decibelHistory.removeFirst(decibelHistory.count - maxHistoryPoints)
         }
     }
 
